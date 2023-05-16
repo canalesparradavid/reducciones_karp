@@ -7,7 +7,6 @@ package karpreductions;
 import java.util.List;
 
 import cnfcomponents.BooleanLiteral;
-import cnfcomponents.BooleanVariable;
 import cnfcomponents.CNFBooleanFormula;
 import cnfcomponents.DisjunctiveBooleanClause;
 import java.util.ArrayList;
@@ -69,47 +68,48 @@ public class TresSat implements KarpReduction<CNFBooleanFormula, CNFBooleanFormu
         else if (literals.size() > 3) {
             // Si la lista tiene mas de tres literales estos de tratan en dos pasos
             
-            BooleanLiteral s = EQV(literals.get(0), literals.get(1));
+            BooleanLiteral s = TDISJUNCTION(literals.get(0), literals.get(1));
             
             for (int i = 2; i < literals.size(); i++) {
-                s = EQV(s, literals.get(i));
+                s = TDISJUNCTION(s, literals.get(i));
             }
+            
+            solve(s);
         }
     }
     
-    private BooleanLiteral EQV(BooleanLiteral p, BooleanLiteral q) {
+    private void solve (BooleanLiteral a) {
+        List<BooleanLiteral> literals = new ArrayList();
+        literals.add(a);
+        solve(literals);
+    }
+    
+    private void solve (BooleanLiteral a, BooleanLiteral b) {
+        List<BooleanLiteral> literals = new ArrayList();
+        literals.add(a);
+        literals.add(b);
+        solve(literals);
+    }
+    
+    private BooleanLiteral TDISJUNCTION(BooleanLiteral p, BooleanLiteral q) {
         /*
-            // Esto crea una nueva variable x que evalue (P ∨ Q) siendo P y Q dos literales sucesivos de la lista de entrada
-                (NOT x ∨ P ∨ Q)   ---> Esto asegura que si x1 es verdadero, al menos uno de L1 o L2 debe ser verdadero.
-                (x ∨ NOT P)       ---> Esto asegura que si L1 es falso, x1 debe ser falso también.
-                (x ∨ NOT Q)       ---> Esto asegura que si L2 es falso, x1 debe ser falso también.
-
-            // Esto realiza la doble equivalencia s↔x
-                (s ∨ NOT P ∨ NOT Q)
-                (NOT s ∨ P ∨ Q)
+            S <-> P v Q
+                (S v NOT P)
+                (S v NOT Q)
+                (NOT S v P v Q)
         */
         
-        BooleanLiteral x = phi.newVariable().getPositiveLiteral();
         BooleanLiteral s = phi.newVariable().getPositiveLiteral();
 
-        phi.addClause(new DisjunctiveBooleanClause(x.not(), p, q));         // (NOT x ∨ P ∨ Q)
-        phi.addClause(new DisjunctiveBooleanClause(s, p.not(), q.not()));   // (s ∨ NOT P ∨ NOT Q)
-        phi.addClause(new DisjunctiveBooleanClause(s.not(), p, q));         // (NOT s ∨ P ∨ Q)
+        // (NOT s ∨ P ∨ Q)
+        phi.addClause(new DisjunctiveBooleanClause(s.not(), p, q));         
+ 
+        // (s ∨ NOT P)
+        solve(s, p.not());
 
-        List<BooleanLiteral> literals = new ArrayList();
-
-        // (x ∨ NOT P)
-        literals.add(x);
-        literals.add(p.not());
-        solve(literals);
-        literals.clear();
-
-        // (x ∨ NOT Q)
-        literals.add(x);
-        literals.add(q.not());
-        solve(literals);
-        literals.clear();
+        // (s ∨ NOT Q)
+        solve(s, q.not());
 
         return s;
-        }
+    }
 }
