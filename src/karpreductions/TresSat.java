@@ -25,6 +25,11 @@ public class TresSat implements KarpReduction<CNFBooleanFormula, CNFBooleanFormu
     }
     
     @Override
+    /*
+     * FUNCION: transform
+     * ENTRADA: Una formula booleana
+     * SALIDA: Una nueva formula booleana formada por clausulas de 3 literales
+    */
     public CNFBooleanFormula transform (CNFBooleanFormula instances) {
         // Extraigo las clausulas a patir de la instancias del problema
         List<DisjunctiveBooleanClause> clauses = instances.getClauses();
@@ -37,6 +42,11 @@ public class TresSat implements KarpReduction<CNFBooleanFormula, CNFBooleanFormu
         return phi;
     }
     
+    /*
+     * ACCION: solve
+     * ENTRDA: Una lista de literales
+     * MODIFICA: Añade a la formula booleana una serie de clausulas de 3 literales
+    */
     protected void solve (List<BooleanLiteral> literals) {
         if (literals.size() == 1) {
             // Si la lista contiene un unico literal se desdoblan introduciendo dos nuevas variables
@@ -78,19 +88,39 @@ public class TresSat implements KarpReduction<CNFBooleanFormula, CNFBooleanFormu
         }
     }
     
+    /*
+     * ACCION: solve
+     * ENTRDA: Un literal
+     * MODIFICA: Añade a la formula booleana una serie de clausulas de 3 literales
+    */
     private void solve (BooleanLiteral a) {
         List<BooleanLiteral> literals = new ArrayList();
+        
         literals.add(a);
+        
         solve(literals);
     }
     
+    /*
+     * ACCION: solve
+     * ENTRDA: Dos literales
+     * MODIFICA: Añade a la formula booleana una serie de clausulas de 3 literales
+    */
     private void solve (BooleanLiteral a, BooleanLiteral b) {
         List<BooleanLiteral> literals = new ArrayList();
+        
         literals.add(a);
         literals.add(b);
+        
         solve(literals);
     }
     
+    /*
+     * ACCION: TDISJUNCTION
+     * ENTRDA: Dos literales
+     * MODIFICA: Añade una serie de clausulas de 3 literales a la formula booleana
+     * DEVUELVE: Una nueva variable s
+    */
     private BooleanLiteral TDISJUNCTION(BooleanLiteral p, BooleanLiteral q) {
         /*
             S <-> P v Q
