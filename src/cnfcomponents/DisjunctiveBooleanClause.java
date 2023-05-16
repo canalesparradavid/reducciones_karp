@@ -67,5 +67,9 @@ public final class DisjunctiveBooleanClause {
     return output;
 
   }
+  
+  public List<BooleanLiteral> getLiterals () {
+      return this.literals;
+  }
 
 }
