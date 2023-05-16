@@ -17,7 +17,7 @@ import java.util.ArrayList;
  *
  * @author David
  */
-public class TresSat extends KarpReduction{
+public class TresSat implements KarpReduction<CNFBooleanFormula, CNFBooleanFormula>{
     
     protected CNFBooleanFormula phi;
     
@@ -26,11 +26,19 @@ public class TresSat extends KarpReduction{
     }
     
     @Override
-    public void run() {
+    public CNFBooleanFormula transform (CNFBooleanFormula instances) {
+        // Extraigo las clausulas a patir de la instancias del problema
+        List<DisjunctiveBooleanClause> clauses = instances.getClauses();
         
+        // Para cada clausula aplico el 3SAT
+        for (DisjunctiveBooleanClause clause : clauses) {
+            solve(clause.getLiterals());
+        }
+        
+        return phi;
     }
     
-    protected void solve(List<BooleanLiteral> literals) {
+    protected void solve (List<BooleanLiteral> literals) {
         if (literals.size() == 1) {
             // Si la lista contiene un unico literal se desdoblan introduciendo dos nuevas variables
             
