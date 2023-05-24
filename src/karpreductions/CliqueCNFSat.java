@@ -64,14 +64,69 @@ public class CliqueCNFSat implements KarpReduction<UndirectedGraph, CNFBooleanFo
      * ENTRADA: Un grafo no dirigido
      * SALIDA: Un vector con las aristas de un clique de k componentes
      */
-    private List<BooleanLiteral> getX(UndirectedGraph G) {
-        List<BooleanLiteral> X = new ArrayList();
+    private List<BooleanLiteral> getClique(UndirectedGraph G) {
+        List<BooleanLiteral> clique = new ArrayList();
+        List<Integer> R = new ArrayList();  // Clique
+        List<Integer> P = new ArrayList();  // Candidates
+        List<Integer> X = new ArrayList();  // Excluded
+
         
         // Inicializo la lista
         for (int i = 1; i <= n; i++) {
-            X.add(phi.newVariable().getPositiveLiteral());
+            clique.add(phi.newVariable().getNegativeLiteral());
+            P.add(i);
         }
         
-        return X;
+        // Calculo el clique
+        BronKerbosch(R, P, X, G);
+        
+        // Almaceno los vertices del clique
+        for (int v : R) {
+            clique.set(v, clique.get(v).not());
+        }
+        
+        return clique;
+    }
+    
+    private boolean BronKerbosch(List<Integer> R, List<Integer> P, List<Integer> X, UndirectedGraph G) {
+        if (P.isEmpty() && X.isEmpty()) {
+            R = new ArrayList();
+            return true;
+        }
+        
+        List<Integer> Raux = new ArrayList(R);
+        List<Integer> Paux = new ArrayList(P);
+        List<Integer> Xaux = new ArrayList(X);
+        for (Integer v : P) {
+            Raux.add(v);
+            boolean found = 
+                BronKerbosch(
+                    Raux,
+                    intersection(Paux, G.neighbours(v)),
+                    intersection(Xaux, G.neighbours(v)),
+                    G
+                );
+            Paux.remove(v);
+            Xaux.add(v);
+            
+            if (found) {
+                R = new ArrayList(Raux);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    private <T> List<T> intersection(List<T> a, List<T> b) {
+        List<T> c = new ArrayList(a);
+        
+        for (T element: b) {
+            if (!c.contains(element)) {
+                c.remove(element);
+            }
+        }
+        
+        return c;
     }
 }
