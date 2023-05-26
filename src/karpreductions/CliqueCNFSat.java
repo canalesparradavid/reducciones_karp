@@ -39,7 +39,10 @@ public class CliqueCNFSat implements KarpReduction<UndirectedGraph, CNFBooleanFo
         n = G.vertices();
         
         // Creo la matriz X que alamcena si el vertice pertenece al Clique o no
-        List<BooleanLiteral> X = getClique(G);
+        List<BooleanLiteral> X = new ArrayList();
+        for (int i = 1; i <= n; i++) {
+            X.add(phi.newVariable().getNegativeLiteral());
+        }
         
         // El clique está formado por exactamente k nodos
         constraints.exactly(k, X, phi);
@@ -57,86 +60,5 @@ public class CliqueCNFSat implements KarpReduction<UndirectedGraph, CNFBooleanFo
         }
         
         return phi;
-    }
-    
-    /*
-     * FUNCION: getClique
-     * ENTRADA: Un grafo no dirigido
-     * SALIDA: Un vector que indica los vertices de un clique maximo
-     */
-    private List<BooleanLiteral> getClique(UndirectedGraph G) {
-        List<BooleanLiteral> clique = new ArrayList();
-        List<Integer> R = new ArrayList();  // Clique
-        List<Integer> P = new ArrayList();  // Candidates
-        List<Integer> X = new ArrayList();  // Excluded
-
-        
-        // Inicializo la lista
-        for (int i = 1; i <= n; i++) {
-            clique.add(phi.newVariable().getNegativeLiteral());
-            P.add(i);
-        }
-        
-        // Calculo el clique
-        BronKerbosch(R, P, X, G);
-        
-        // Almaceno los vertices del clique
-        for (int v : R) {
-            clique.set(v, clique.get(v).not());
-        }
-        
-        return clique;
-    }
-    
-    /*
-     * ACCION: BronKerbosch
-     * ENTRADA: Dos listas vacias R y X y una lista con todos los vertices de G P
-     * MODIFICA: Almacena en R los vertices que constituyen un clique maximo
-    */
-    private boolean BronKerbosch(List<Integer> R, List<Integer> P, List<Integer> X, UndirectedGraph G) {
-        if (P.isEmpty() && X.isEmpty()) {
-            R = new ArrayList();
-            return true;
-        }
-        
-        List<Integer> Raux = new ArrayList(R);
-        List<Integer> Paux = new ArrayList(P);
-        List<Integer> Xaux = new ArrayList(X);
-        for (Integer v : P) {
-            Raux.add(v);
-            boolean found = 
-                BronKerbosch(
-                    Raux,
-                    intersection(Paux, G.neighbours(v)),
-                    intersection(Xaux, G.neighbours(v)),
-                    G
-                );
-            Paux.remove(v);
-            Xaux.add(v);
-            
-            if (found) {
-                R = new ArrayList(Raux);
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    /*
-     * FUNCION: intersection
-     * ENTRADA: Dos listas a y b
-     * SALIDA: Una unica lista con los elementos contenidos por explicitamente por las dos listas
-    */
-    private <T> List<T> intersection(List<T> a, List<T> b) {
-        List<T> c = new ArrayList(a);
-        
-        for (T element: b) {
-            if (!c.contains(element)) {
-                c.remove(element);
-            }
-        }
-        
-        return c;
     }
 }
