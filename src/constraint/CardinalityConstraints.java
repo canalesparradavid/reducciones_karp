@@ -1,14 +1,14 @@
-package constraints;
+package constraint;
 /**
  *
  * @author MAZ
  */
+import java.util.List;
+//
 import cnfcomponents.BooleanLiteral;
-import cnfcomponents.BooleanVariable;
 import cnfcomponents.CNFBooleanFormula;
 import cnfcomponents.DisjunctiveBooleanClause;
-import java.util.List;
-
+//
 public interface CardinalityConstraints {
 
   public void atMost (final int k,
@@ -42,4 +42,5 @@ public interface CardinalityConstraints {
     atLeast1(literals, phi);
     atMost1(literals, phi);
   }
+
 }
